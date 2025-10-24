@@ -210,3 +210,5 @@ export default async function Home() {
     </div>
   )
 }
+
+export const revalidate = 300 // 5 minutes

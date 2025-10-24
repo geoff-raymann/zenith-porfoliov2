@@ -125,3 +125,5 @@ export default async function ProjectsPage() {
     </div>
   )
 }
+
+export const revalidate = 300 // 5 minutes
