@@ -5,7 +5,15 @@ import Image from 'next/image'
 import Link from 'next/link'
 
 async function getProjects() {
-  const projects = await client.fetch(allProjectsQuery)
+  const projects = await client.fetch(
+    allProjectsQuery, 
+    {}, 
+    { 
+      next: { 
+        tags: ['projects', 'homepage'] 
+      } 
+    }
+  )
   return projects
 }
 
@@ -95,11 +103,25 @@ export default async function ProjectsPage() {
             <p className="text-gray-500 dark:text-gray-400 text-lg">
               No projects yet. Add some projects in Sanity Studio!
             </p>
+            <Link 
+              href="https://your-studio.sanity.studio" 
+              target="_blank"
+              className="inline-block mt-4 text-blue-600 hover:text-blue-700 dark:text-blue-400"
+            >
+              Go to Sanity Studio
+            </Link>
           </div>
         )}
+
+        <div className="text-center mt-12">
+          <Link 
+            href="/" 
+            className="border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 px-6 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition duration-300 inline-block"
+          >
+            ← Back to Home
+          </Link>
+        </div>
       </div>
     </div>
   )
 }
-
-export const revalidate = 86400

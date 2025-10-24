@@ -1,13 +1,26 @@
-import { client, urlFor } from '@/lib/sanity/client'
+import { client } from '@/lib/sanity/client'
 import { featuredProjectsQuery, bioQuery, recommendationsQuery } from '@/lib/sanity/queries'
+import { urlFor } from '@/lib/sanity/client'
 import Image from 'next/image'
 import Link from 'next/link'
 
 async function getData() {
   const [projects, bio, recommendations] = await Promise.all([
-    client.fetch(featuredProjectsQuery),
-    client.fetch(bioQuery),
-    client.fetch(recommendationsQuery),
+    client.fetch(featuredProjectsQuery, {}, { 
+      next: { 
+        tags: ['homepage', 'projects'] 
+      } 
+    }),
+    client.fetch(bioQuery, {}, { 
+      next: { 
+        tags: ['homepage', 'bio'] 
+      } 
+    }),
+    client.fetch(recommendationsQuery, {}, { 
+      next: { 
+        tags: ['homepage', 'recommendations'] 
+      } 
+    }),
   ])
   return { projects, bio, recommendations }
 }
@@ -197,6 +210,3 @@ export default async function Home() {
     </div>
   )
 }
-
-// This tells Next.js to revalidate the page every 24 hours
-export const revalidate = 86400
