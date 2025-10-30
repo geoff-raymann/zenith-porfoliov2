@@ -191,26 +191,16 @@ export function SkillsShowcase({ skills }: SkillsShowcaseProps) {
                                 width={40}
                                 height={40}
                                 className="rounded-lg"
-                                onError={(e) => {
-                                  // Fallback to default icon if URL fails
-                                  const target = e.target as HTMLImageElement
-                                  target.src = DEFAULT_ICON
-                                }}
                               />
                             </div>
                             <div className="absolute inset-0 bg-cyan-400/20 rounded-lg blur-sm opacity-0 group-hover/skill:opacity-100 transition-opacity duration-300" />
                           </div>
                           
-                          {/* Skill Info */}
+                          {/* Skill Info - Description removed */}
                           <div>
                             <h4 className="text-lg font-semibold text-white">
                               {skill.name}
                             </h4>
-                            {skill.description && (
-                              <p className="text-sm text-gray-400 mt-1 max-w-xs">
-                                {skill.description}
-                              </p>
-                            )}
                           </div>
                         </div>
 

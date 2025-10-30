@@ -33,6 +33,7 @@ export interface Skill {
   icon: string
   proficiency: 'beginner' | 'intermediate' | 'advanced' | 'expert'
   category: string
+  description?: string // Make this optional
 }
 
 export interface Bio {
