@@ -5,31 +5,40 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { SkillsShowcase } from '@/components/sections/SkillsShowcase'
 import { TechIcon } from '@/components/ui/TechIcon'
+import { ProjectSkeleton } from '@/components/ui/ProjectSkeleton'
+import { SkillsSkeleton } from '@/components/ui/SkillsSkeleton'
+import { SectionWrapper } from '@/components/sections/SectionWrapper'
+import { LazyLoad } from '@/components/ui/LazyLoad'
 
 async function getData() {
-  const [projects, bio, recommendations, skills] = await Promise.all([
-    client.fetch(featuredProjectsQuery, {}, { 
-      next: { 
-        tags: ['homepage', 'projects'] 
-      } 
-    }),
-    client.fetch(bioQuery, {}, { 
-      next: { 
-        tags: ['homepage', 'bio'] 
-      } 
-    }),
-    client.fetch(recommendationsQuery, {}, { 
-      next: { 
-        tags: ['homepage', 'recommendations'] 
-      } 
-    }),
-    client.fetch(skillsQuery, {}, { 
-      next: { 
-        tags: ['homepage', 'skills'] 
-      } 
-    }),
-  ])
-  return { projects, bio, recommendations, skills }
+  try {
+    const [projects, bio, recommendations, skills] = await Promise.all([
+      client.fetch(featuredProjectsQuery, {}, { 
+        next: { 
+          tags: ['homepage', 'projects'] 
+        } 
+      }),
+      client.fetch(bioQuery, {}, { 
+        next: { 
+          tags: ['homepage', 'bio'] 
+        } 
+      }),
+      client.fetch(recommendationsQuery, {}, { 
+        next: { 
+          tags: ['homepage', 'recommendations'] 
+        } 
+      }),
+      client.fetch(skillsQuery, {}, { 
+        next: { 
+          tags: ['homepage', 'skills'] 
+        } 
+      }),
+    ])
+    return { projects, bio, recommendations, skills }
+  } catch (error) {
+    console.error('Error fetching data:', error)
+    return { projects: [], bio: null, recommendations: [], skills: [] }
+  }
 }
 
 export default async function Home() {
@@ -37,247 +46,299 @@ export default async function Home() {
 
   return (
     <div className="min-h-screen">
-      {/* Hero Section */}
+      {/* Hero Section - Immediate load, no lazy loading */}
       <section className="min-h-screen flex items-center justify-center px-4 bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
-        <div className="text-center max-w-4xl mx-auto">
-          {bio?.profileImage && (
-            <div className="mb-8">
-              <Image
-                src={urlFor(bio.profileImage).width(200).height(200).url()}
-                alt={bio.name}
-                width={200}
-                height={200}
-                className="rounded-full mx-auto w-32 h-32 object-cover border-4 border-white dark:border-gray-700 shadow-lg"
-              />
-            </div>
-          )}
-          
-          <h1 className="text-4xl sm:text-6xl font-bold text-gray-900 dark:text-white mb-6">
-            {bio?.name || "Zenith Portfolio"}
-          </h1>
-          
-          <p className="text-xl sm:text-2xl text-gray-600 dark:text-gray-300 mb-8">
-            {bio?.tagline || "Data Scientist & AI Engineer"}
-          </p>
-          
-          <p className="text-lg text-gray-500 dark:text-gray-400 mb-12 max-w-2xl mx-auto">
-            {bio?.description || "Building intelligent solutions with data and machine learning"}
-          </p>
-          
-          <div className="space-x-4">
-            <Link 
-              href="/projects" 
-              className="bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 transition duration-300 transform hover:scale-105 inline-block"
-            >
-              View Projects
-            </Link>
-            <Link 
-              href="/contact" 
-              className="border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 px-8 py-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition duration-300 inline-block"
-            >
-              Contact Me
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* Skills Section */}
-      {skills && skills.length > 0 && (
-        <SkillsShowcase skills={skills} />
-      )}
-
-      {/* Featured Projects Section */}
-      {projects && projects.length > 0 && (
-        <section className="py-20 px-4 bg-white dark:bg-gray-900">
-          <div className="max-w-6xl mx-auto">
-            <h2 className="text-3xl sm:text-4xl font-bold text-center text-gray-900 dark:text-white mb-4">
-              Featured Projects
-            </h2>
-            <p className="text-lg text-gray-600 dark:text-gray-300 text-center mb-12 max-w-2xl mx-auto">
-              Showcasing my latest data science and AI engineering work
+        <LazyLoad delay={0.2} yOffset={0} duration={1}>
+          <div className="text-center max-w-4xl mx-auto">
+            {bio?.profileImage && (
+              <div className="mb-8">
+                <Image
+                  src={urlFor(bio.profileImage).width(200).height(200).url()}
+                  alt={bio.name}
+                  width={200}
+                  height={200}
+                  className="rounded-full mx-auto w-32 h-32 object-cover border-4 border-white dark:border-gray-700 shadow-lg"
+                />
+              </div>
+            )}
+            
+            <h1 className="text-4xl sm:text-6xl font-bold text-gray-900 dark:text-white mb-6">
+              {bio?.name || "Zenith Portfolio"}
+            </h1>
+            
+            <p className="text-xl sm:text-2xl text-gray-600 dark:text-gray-300 mb-8">
+              {bio?.tagline || "Data Scientist & AI Engineer"}
             </p>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {projects.map((project: any) => (
-                <div 
-                  key={project._id} 
-                  className="bg-gray-50 dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition duration-300"
-                >
-                  {project.mainImage && (
-                    <div className="relative h-48">
-                      <Image
-                        src={urlFor(project.mainImage).width(400).height(200).url()}
-                        alt={project.title}
-                        fill
-                        className="object-cover"
-                      />
-                    </div>
-                  )}
-                  
-                  <div className="p-6">
-                    <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">
-                      {project.title}
-                    </h3>
-                    
-                    <p className="text-gray-600 dark:text-gray-300 mb-4 line-clamp-3">
-                      {project.summary}
-                    </p>
-                    
-                    {/* Technology Icons Grid */}
-                    {project.tech && project.tech.length > 0 && (
-                      <div className="mb-4">
-                        <div className="flex flex-wrap gap-2">
-                          {project.tech.slice(0, 4).map((techIconUrl: string, index: number) => (
-                            <TechIcon
-                              key={index}
-                              iconUrl={techIconUrl}
-                              alt={getTechNameFromUrl(techIconUrl)}
-                              size="md"
-                            />
-                          ))}
-                          {project.tech.length > 4 && (
-                            <div className="w-8 h-8 bg-gray-100 dark:bg-gray-600 rounded border border-gray-200 dark:border-gray-600 flex items-center justify-center text-xs text-gray-500 dark:text-gray-400 font-medium">
-                              +{project.tech.length - 4}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    )}
-                    
-                    <div className="flex space-x-3">
-                      {project.demoUrl && (
-                        <a 
-                          href={project.demoUrl} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 text-sm font-medium"
-                        >
-                          Live Demo
-                        </a>
-                      )}
-                      {project.repoUrl && (
-                        <a 
-                          href={project.repoUrl} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="text-gray-600 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 text-sm font-medium"
-                        >
-                          Code
-                        </a>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
+            <p className="text-lg text-gray-500 dark:text-gray-400 mb-12 max-w-2xl mx-auto">
+              {bio?.description || "Building intelligent solutions with data and machine learning"}
+            </p>
             
-            <div className="text-center mt-12">
+            <div className="space-x-4">
               <Link 
                 href="/projects" 
-                className="border border-blue-600 text-blue-600 dark:border-blue-400 dark:text-blue-400 px-8 py-3 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 transition duration-300 inline-block"
+                className="bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 transition duration-300 transform hover:scale-105 inline-block"
               >
-                View All Projects
+                View Projects
+              </Link>
+              <Link 
+                href="/contact" 
+                className="border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 px-8 py-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition duration-300 inline-block"
+              >
+                Contact Me
               </Link>
             </div>
           </div>
-        </section>
-      )}
+        </LazyLoad>
+      </section>
 
-      {/* Recommendations Section */}
-      {recommendations && recommendations.length > 0 && (
-        <section className="py-20 px-4 bg-gray-50 dark:bg-gray-800">
-          <div className="max-w-4xl mx-auto">
-            <h2 className="text-3xl sm:text-4xl font-bold text-center text-gray-900 dark:text-white mb-12">
-              What People Say
-            </h2>
+      {/* Skills Section - Lazy loaded with delay */}
+      <SectionWrapper delay={0.1}>
+        {skills && skills.length > 0 ? (
+          <SkillsShowcase skills={skills} />
+        ) : (
+          <SkillsSkeleton />
+        )}
+      </SectionWrapper>
+
+      {/* Featured Projects Section - Lazy loaded */}
+      <SectionWrapper delay={0.2}>
+        <section className="py-20 px-4 bg-white dark:bg-gray-900">
+          <div className="max-w-6xl mx-auto">
+            <LazyLoad delay={0.3} yOffset={20}>
+              <h2 className="text-3xl sm:text-4xl font-bold text-center text-gray-900 dark:text-white mb-4">
+                Featured Projects
+              </h2>
+            </LazyLoad>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              {recommendations.slice(0, 2).map((rec: any) => (
-                <div 
-                  key={rec._id} 
-                  className="bg-white dark:bg-gray-700 rounded-xl p-6 shadow-lg"
-                >
-                  <p className="text-gray-600 dark:text-gray-300 italic mb-6 text-lg">
-                    "{rec.quote}"
-                  </p>
-                  
-                  <div className="flex items-center">
-                    {rec.avatar && (
-                      <Image
-                        src={urlFor(rec.avatar).width(60).height(60).url()}
-                        alt={rec.authorName}
-                        width={60}
-                        height={60}
-                        className="rounded-full mr-4"
-                      />
-                    )}
-                    
-                    <div>
-                      <h4 className="font-bold text-gray-900 dark:text-white">
-                        {rec.authorName}
-                      </h4>
-                      <p className="text-gray-600 dark:text-gray-300 text-sm">
-                        {rec.position} at {rec.company}
-                      </p>
+            <LazyLoad delay={0.4} yOffset={20}>
+              <p className="text-lg text-gray-600 dark:text-gray-300 text-center mb-12 max-w-2xl mx-auto">
+                Showcasing my latest data science and AI engineering work
+              </p>
+            </LazyLoad>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {projects && projects.length > 0 ? (
+                projects.map((project: any, index: number) => (
+                  <LazyLoad 
+                    key={project._id} 
+                    delay={0.5 + (index * 0.1)}
+                    yOffset={30}
+                    duration={0.6}
+                  >
+                    <div className="bg-gray-50 dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition duration-300 group">
+                      {project.mainImage && (
+                        <div className="relative h-48 overflow-hidden">
+                          <Image
+                            src={urlFor(project.mainImage).width(400).height(200).url()}
+                            alt={project.title}
+                            fill
+                            className="object-cover group-hover:scale-105 transition duration-500"
+                          />
+                        </div>
+                      )}
+                      
+                      <div className="p-6">
+                        <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition duration-300">
+                          {project.title}
+                        </h3>
+                        
+                        <p className="text-gray-600 dark:text-gray-300 mb-4 line-clamp-3">
+                          {project.summary}
+                        </p>
+                        
+                        {/* Technology Icons Grid */}
+                        {project.tech && project.tech.length > 0 && (
+                          <div className="mb-4">
+                            <div className="flex flex-wrap gap-2">
+                              {project.tech.slice(0, 4).map((techIconUrl: string, techIndex: number) => (
+                                <LazyLoad 
+                                  key={techIndex} 
+                                  delay={0.7 + (techIndex * 0.05)}
+                                  yOffset={10}
+                                  duration={0.4}
+                                >
+                                  <TechIcon
+                                    iconUrl={techIconUrl}
+                                    alt={getTechNameFromUrl(techIconUrl)}
+                                    size="md"
+                                  />
+                                </LazyLoad>
+                              ))}
+                              {project.tech.length > 4 && (
+                                <LazyLoad delay={0.9} yOffset={10} duration={0.4}>
+                                  <div className="w-8 h-8 bg-gray-100 dark:bg-gray-600 rounded border border-gray-200 dark:border-gray-600 flex items-center justify-center text-xs text-gray-500 dark:text-gray-400 font-medium">
+                                    +{project.tech.length - 4}
+                                  </div>
+                                </LazyLoad>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                        
+                        <div className="flex space-x-3">
+                          {project.demoUrl && (
+                            <a 
+                              href={project.demoUrl} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 text-sm font-medium transition duration-300"
+                            >
+                              Live Demo
+                            </a>
+                          )}
+                          {project.repoUrl && (
+                            <a 
+                              href={project.repoUrl} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="text-gray-600 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 text-sm font-medium transition duration-300"
+                            >
+                              Code
+                            </a>
+                          )}
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </div>
-              ))}
+                  </LazyLoad>
+                ))
+              ) : (
+                // Show skeleton loaders when no projects or loading
+                [...Array(3)].map((_, index) => (
+                  <LazyLoad key={index} delay={0.5 + (index * 0.1)} yOffset={30}>
+                    <ProjectSkeleton />
+                  </LazyLoad>
+                ))
+              )}
             </div>
-
-            {recommendations.length > 2 && (
+            
+            <LazyLoad delay={0.8} yOffset={20}>
               <div className="text-center mt-12">
                 <Link 
-                  href="/recommendations" 
-                  className="border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 px-6 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition duration-300 inline-block"
+                  href="/projects" 
+                  className="border border-blue-600 text-blue-600 dark:border-blue-400 dark:text-blue-400 px-8 py-3 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 transition duration-300 inline-block hover:scale-105 transform"
                 >
-                  View All Recommendations
+                  View All Projects
                 </Link>
               </div>
-            )}
+            </LazyLoad>
           </div>
         </section>
+      </SectionWrapper>
+
+      {/* Recommendations Section - Lazy loaded */}
+      {recommendations && recommendations.length > 0 && (
+        <SectionWrapper delay={0.3}>
+          <section className="py-20 px-4 bg-gray-50 dark:bg-gray-800">
+            <div className="max-w-4xl mx-auto">
+              <LazyLoad delay={0.4} yOffset={20}>
+                <h2 className="text-3xl sm:text-4xl font-bold text-center text-gray-900 dark:text-white mb-12">
+                  What People Say
+                </h2>
+              </LazyLoad>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {recommendations.slice(0, 2).map((rec: any, index: number) => (
+                  <LazyLoad 
+                    key={rec._id} 
+                    delay={0.5 + (index * 0.1)}
+                    yOffset={30}
+                    duration={0.6}
+                  >
+                    <div className="bg-white dark:bg-gray-700 rounded-xl p-6 shadow-lg hover:shadow-xl transition duration-300">
+                      <p className="text-gray-600 dark:text-gray-300 italic mb-6 text-lg">
+                        "{rec.quote}"
+                      </p>
+                      
+                      <div className="flex items-center">
+                        {rec.avatar && (
+                          <Image
+                            src={urlFor(rec.avatar).width(60).height(60).url()}
+                            alt={rec.authorName}
+                            width={60}
+                            height={60}
+                            className="rounded-full mr-4"
+                          />
+                        )}
+                        
+                        <div>
+                          <h4 className="font-bold text-gray-900 dark:text-white">
+                            {rec.authorName}
+                          </h4>
+                          <p className="text-gray-600 dark:text-gray-300 text-sm">
+                            {rec.position} at {rec.company}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </LazyLoad>
+                ))}
+              </div>
+
+              {recommendations.length > 2 && (
+                <LazyLoad delay={0.7} yOffset={20}>
+                  <div className="text-center mt-12">
+                    <Link 
+                      href="/recommendations" 
+                      className="border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 px-6 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition duration-300 inline-block"
+                    >
+                      View All Recommendations
+                    </Link>
+                  </div>
+                </LazyLoad>
+              )}
+            </div>
+          </section>
+        </SectionWrapper>
       )}
 
-      {/* Call to Action Section */}
-      <section className="py-20 px-4 bg-blue-600 dark:bg-blue-800">
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-3xl sm:text-4xl font-bold text-white mb-6">
-            Ready to Work Together?
-          </h2>
-          <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
-            Let's discuss your next project and how I can help bring your ideas to life.
-          </p>
-          <div className="space-x-4">
-            <Link 
-              href="/contact" 
-              className="bg-white text-blue-600 px-8 py-3 rounded-lg hover:bg-blue-50 transition duration-300 transform hover:scale-105 inline-block font-medium"
-            >
-              Get In Touch
-            </Link>
-            <Link 
-              href="/projects" 
-              className="border border-white text-white px-8 py-3 rounded-lg hover:bg-blue-700 transition duration-300 inline-block"
-            >
-              See My Work
-            </Link>
+      {/* Call to Action Section - Lazy loaded */}
+      <SectionWrapper delay={0.4}>
+        <section className="py-20 px-4 bg-blue-600 dark:bg-blue-800">
+          <div className="max-w-4xl mx-auto text-center">
+            <LazyLoad delay={0.5} yOffset={20}>
+              <h2 className="text-3xl sm:text-4xl font-bold text-white mb-6">
+                Ready to Work Together?
+              </h2>
+            </LazyLoad>
+            
+            <LazyLoad delay={0.6} yOffset={20}>
+              <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
+                Let's discuss your next project and how I can help bring your ideas to life.
+              </p>
+            </LazyLoad>
+            
+            <LazyLoad delay={0.7} yOffset={20}>
+              <div className="space-x-4">
+                <Link 
+                  href="/contact" 
+                  className="bg-white text-blue-600 px-8 py-3 rounded-lg hover:bg-blue-50 transition duration-300 transform hover:scale-105 inline-block font-medium"
+                >
+                  Get In Touch
+                </Link>
+                <Link 
+                  href="/projects" 
+                  className="border border-white text-white px-8 py-3 rounded-lg hover:bg-blue-700 transition duration-300 inline-block hover:scale-105 transform"
+                >
+                  See My Work
+                </Link>
+              </div>
+            </LazyLoad>
           </div>
-        </div>
-      </section>
+        </section>
+      </SectionWrapper>
     </div>
   )
 }
 
-// Helper function to extract technology name from URL
+// Helper function
 function getTechNameFromUrl(url: string): string {
   try {
-    // Extract from Devicon URL pattern: .../icons/react/react-original.svg
     const match = url.match(/devicon\/icons\/([^\/]+)\//)
     if (match && match[1]) {
       return match[1].charAt(0).toUpperCase() + match[1].slice(1)
     }
     
-    // Extract from other common patterns
     const filename = url.split('/').pop()?.replace('.svg', '').replace('-original', '').replace('-plain', '')
     if (filename) {
       return filename.charAt(0).toUpperCase() + filename.slice(1)
