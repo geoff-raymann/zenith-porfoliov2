@@ -2,7 +2,8 @@ import './globals.css'
 import { Inter, Poppins } from 'next/font/google'
 import { Navbar } from '@/components/layout/Navbar'
 import { Footer } from '@/components/layout/Footer'
-import { ThemeProvider } from '@/components/providers/ThemeProvider' // Add this
+import { ThemeProvider } from '@/components/providers/ThemeProvider'
+import { ScrollToTop } from '@/components/ui/ScrollToTop' // Add this import
 
 const inter = Inter({ 
   subsets: ['latin'],
@@ -28,12 +29,13 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${inter.variable} ${poppins.variable}`} suppressHydrationWarning>
       <body className="min-h-screen bg-white dark:bg-gray-900 transition-colors duration-300">
-        <ThemeProvider> {/* Wrap with ThemeProvider */}
+        <ThemeProvider>
           <Navbar />
           <main className="pt-16">
             {children}
           </main>
           <Footer />
+          <ScrollToTop /> {/* Add ScrollToTop here */}
         </ThemeProvider>
       </body>
     </html>
