@@ -3,6 +3,7 @@ import { allProjectsQuery } from '@/lib/sanity/queries'
 import { urlFor } from '@/lib/sanity/client'
 import Image from 'next/image'
 import Link from 'next/link'
+import { TechIcon } from '@/components/ui/TechIcon'
 
 async function getProjects() {
   const projects = await client.fetch(
@@ -58,16 +59,22 @@ export default async function ProjectsPage() {
                   {project.summary}
                 </p>
                 
+                {/* Technology Icons Grid */}
                 {project.tech && project.tech.length > 0 && (
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    {project.tech.map((tech: string) => (
-                      <span 
-                        key={tech} 
-                        className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 text-sm px-3 py-1 rounded-full"
-                      >
-                        {tech}
-                      </span>
-                    ))}
+                  <div className="mb-6">
+                    <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+                      Built With:
+                    </h4>
+                    <div className="flex flex-wrap gap-3">
+                      {project.tech.map((techIconUrl: string, index: number) => (
+                        <TechIcon
+                          key={index}
+                          iconUrl={techIconUrl}
+                          alt={getTechNameFromUrl(techIconUrl)}
+                          size="lg"
+                        />
+                      ))}
+                    </div>
                   </div>
                 )}
                 
@@ -77,9 +84,10 @@ export default async function ProjectsPage() {
                       href={project.demoUrl} 
                       target="_blank" 
                       rel="noopener noreferrer"
-                      className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition duration-300 text-sm font-medium"
+                      className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition duration-300 text-sm font-medium flex items-center space-x-2"
                     >
-                      Live Demo
+                      <span>🌐</span>
+                      <span>Live Demo</span>
                     </a>
                   )}
                   {project.repoUrl && (
@@ -87,9 +95,10 @@ export default async function ProjectsPage() {
                       href={project.repoUrl} 
                       target="_blank" 
                       rel="noopener noreferrer"
-                      className="border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 px-4 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition duration-300 text-sm font-medium"
+                      className="border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 px-4 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition duration-300 text-sm font-medium flex items-center space-x-2"
                     >
-                      View Code
+                      <span>💻</span>
+                      <span>View Code</span>
                     </a>
                   )}
                 </div>
@@ -103,13 +112,6 @@ export default async function ProjectsPage() {
             <p className="text-gray-500 dark:text-gray-400 text-lg">
               No projects yet. Add some projects in Sanity Studio!
             </p>
-            <Link 
-              href="https://your-studio.sanity.studio" 
-              target="_blank"
-              className="inline-block mt-4 text-blue-600 hover:text-blue-700 dark:text-blue-400"
-            >
-              Go to Sanity Studio
-            </Link>
           </div>
         )}
 
@@ -126,4 +128,25 @@ export default async function ProjectsPage() {
   )
 }
 
-export const revalidate = 300 // 5 minutes
+// Helper function to extract technology name from URL
+function getTechNameFromUrl(url: string): string {
+  try {
+    // Extract from Devicon URL pattern: .../icons/react/react-original.svg
+    const match = url.match(/devicon\/icons\/([^\/]+)\//)
+    if (match && match[1]) {
+      return match[1].charAt(0).toUpperCase() + match[1].slice(1)
+    }
+    
+    // Extract from other common patterns
+    const filename = url.split('/').pop()?.replace('.svg', '').replace('-original', '').replace('-plain', '')
+    if (filename) {
+      return filename.charAt(0).toUpperCase() + filename.slice(1)
+    }
+    
+    return 'Technology'
+  } catch {
+    return 'Technology'
+  }
+}
+
+export const revalidate = 300

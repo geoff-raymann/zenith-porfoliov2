@@ -1,11 +1,13 @@
 import { client } from '@/lib/sanity/client'
-import { featuredProjectsQuery, bioQuery, recommendationsQuery } from '@/lib/sanity/queries'
+import { featuredProjectsQuery, bioQuery, recommendationsQuery, skillsQuery } from '@/lib/sanity/queries'
 import { urlFor } from '@/lib/sanity/client'
 import Image from 'next/image'
 import Link from 'next/link'
+import { SkillsShowcase } from '@/components/sections/SkillsShowcase'
+import { TechIcon } from '@/components/ui/TechIcon'
 
 async function getData() {
-  const [projects, bio, recommendations] = await Promise.all([
+  const [projects, bio, recommendations, skills] = await Promise.all([
     client.fetch(featuredProjectsQuery, {}, { 
       next: { 
         tags: ['homepage', 'projects'] 
@@ -21,12 +23,17 @@ async function getData() {
         tags: ['homepage', 'recommendations'] 
       } 
     }),
+    client.fetch(skillsQuery, {}, { 
+      next: { 
+        tags: ['homepage', 'skills'] 
+      } 
+    }),
   ])
-  return { projects, bio, recommendations }
+  return { projects, bio, recommendations, skills }
 }
 
 export default async function Home() {
-  const { projects, bio, recommendations } = await getData()
+  const { projects, bio, recommendations, skills } = await getData()
 
   return (
     <div className="min-h-screen">
@@ -74,6 +81,11 @@ export default async function Home() {
         </div>
       </section>
 
+      {/* Skills Section */}
+      {skills && skills.length > 0 && (
+        <SkillsShowcase skills={skills} />
+      )}
+
       {/* Featured Projects Section */}
       {projects && projects.length > 0 && (
         <section className="py-20 px-4 bg-white dark:bg-gray-900">
@@ -111,16 +123,24 @@ export default async function Home() {
                       {project.summary}
                     </p>
                     
+                    {/* Technology Icons Grid */}
                     {project.tech && project.tech.length > 0 && (
-                      <div className="flex flex-wrap gap-2 mb-4">
-                        {project.tech.slice(0, 3).map((tech: string) => (
-                          <span 
-                            key={tech} 
-                            className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 text-xs px-2 py-1 rounded"
-                          >
-                            {tech}
-                          </span>
-                        ))}
+                      <div className="mb-4">
+                        <div className="flex flex-wrap gap-2">
+                          {project.tech.slice(0, 4).map((techIconUrl: string, index: number) => (
+                            <TechIcon
+                              key={index}
+                              iconUrl={techIconUrl}
+                              alt={getTechNameFromUrl(techIconUrl)}
+                              size="md"
+                            />
+                          ))}
+                          {project.tech.length > 4 && (
+                            <div className="w-8 h-8 bg-gray-100 dark:bg-gray-600 rounded border border-gray-200 dark:border-gray-600 flex items-center justify-center text-xs text-gray-500 dark:text-gray-400 font-medium">
+                              +{project.tech.length - 4}
+                            </div>
+                          )}
+                        </div>
                       </div>
                     )}
                     
@@ -204,11 +224,69 @@ export default async function Home() {
                 </div>
               ))}
             </div>
+
+            {recommendations.length > 2 && (
+              <div className="text-center mt-12">
+                <Link 
+                  href="/recommendations" 
+                  className="border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 px-6 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition duration-300 inline-block"
+                >
+                  View All Recommendations
+                </Link>
+              </div>
+            )}
           </div>
         </section>
       )}
+
+      {/* Call to Action Section */}
+      <section className="py-20 px-4 bg-blue-600 dark:bg-blue-800">
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="text-3xl sm:text-4xl font-bold text-white mb-6">
+            Ready to Work Together?
+          </h2>
+          <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
+            Let's discuss your next project and how I can help bring your ideas to life.
+          </p>
+          <div className="space-x-4">
+            <Link 
+              href="/contact" 
+              className="bg-white text-blue-600 px-8 py-3 rounded-lg hover:bg-blue-50 transition duration-300 transform hover:scale-105 inline-block font-medium"
+            >
+              Get In Touch
+            </Link>
+            <Link 
+              href="/projects" 
+              className="border border-white text-white px-8 py-3 rounded-lg hover:bg-blue-700 transition duration-300 inline-block"
+            >
+              See My Work
+            </Link>
+          </div>
+        </div>
+      </section>
     </div>
   )
 }
 
-export const revalidate = 300 // 5 minutes
+// Helper function to extract technology name from URL
+function getTechNameFromUrl(url: string): string {
+  try {
+    // Extract from Devicon URL pattern: .../icons/react/react-original.svg
+    const match = url.match(/devicon\/icons\/([^\/]+)\//)
+    if (match && match[1]) {
+      return match[1].charAt(0).toUpperCase() + match[1].slice(1)
+    }
+    
+    // Extract from other common patterns
+    const filename = url.split('/').pop()?.replace('.svg', '').replace('-original', '').replace('-plain', '')
+    if (filename) {
+      return filename.charAt(0).toUpperCase() + filename.slice(1)
+    }
+    
+    return 'Technology'
+  } catch {
+    return 'Technology'
+  }
+}
+
+export const revalidate = 300

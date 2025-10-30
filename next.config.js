@@ -1,8 +1,10 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'standalone', // This helps with Vercel deployment
   images: {
-    domains: ['cdn.sanity.io'],
+    domains: [
+      'cdn.jsdelivr.net',
+      'cdn.sanity.io'
+    ],
     formats: ['image/avif', 'image/webp'],
   },
   swcMinify: true,
